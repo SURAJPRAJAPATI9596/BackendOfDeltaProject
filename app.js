@@ -4,6 +4,7 @@ const Listing = require("./models/listing");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const ExpressError = require("./expressError");
+const listingSchema = require("./schema");
 const port = 8080;
 app.use(cors());
 const morgan = require("morgan");
@@ -15,6 +16,7 @@ app.use((req, res, next) => {
   return next();
 });
 
+// mongoose
 main()
   .then((res) => {
     console.log("Server is connected with db");
@@ -26,11 +28,11 @@ main()
 async function main() {
   await mongoose.connect("mongodb://127.0.0.1:27017/wanderLust");
 }
-
+// server
 app.listen(port, () => {
   console.log("server Started");
 });
-
+//Main rout
 app.get("/api/listings", (req, res, next) => {
   try {
     Listing.find()
@@ -45,6 +47,7 @@ app.get("/api/listings", (req, res, next) => {
   }
 });
 
+//search or find rout
 app.get("/api/listings/:id", (req, res) => {
   const { id } = req.params;
   Listing.findById(id)
@@ -55,9 +58,11 @@ app.get("/api/listings/:id", (req, res) => {
       console.log(err);
     });
 });
-
+//new route
 app.post("/api/listings/new", async (req, res) => {
   const data = req.body;
+  const response = listingSchema.validate(data);
+  console.log(response);
   const newListing = new Listing(data);
   newListing;
   newListing
@@ -69,7 +74,7 @@ app.post("/api/listings/new", async (req, res) => {
       console.log("sorry! we cauth error", err);
     });
 });
-
+//edit
 app.put("/api/listings/:id", (req, res) => {
   const { id } = req.params;
   console.log("request accepted");
@@ -94,6 +99,7 @@ app.put("/api/listings/:id", (req, res) => {
     });
 });
 
+// delete route
 app.delete("/api/listings/:id", (req, res) => {
   const { id } = req.params;
 
