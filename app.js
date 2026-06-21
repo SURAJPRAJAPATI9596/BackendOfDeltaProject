@@ -5,6 +5,7 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const ExpressError = require("./expressError");
 const listingSchema = require("./schema");
+const review = require("./models/review");
 const port = 8080;
 app.use(cors());
 const morgan = require("morgan");
@@ -110,6 +111,23 @@ app.delete("/api/listings/:id", (req, res) => {
     .catch((err) => {
       console.log("sorry! we cauth error", err);
     });
+});
+
+// reviews adding
+
+app.post("/api/listings/:id/reviews", async (req, res) => {
+  const newReview = new review(req.body);
+  const reviewedListing = await Listing.findOne({ _id: req.params });
+  console.log(reviewedListing);
+  newReview
+    .save()
+    .then((result) => {
+      console.log(result);
+    })
+    .then((err) => {
+      console.log(err);
+    });
+  reviewedListing.reviews.push((prev) => ({ ...prev, newReview }));
 });
 
 app.use((err, req, res, next) => {
