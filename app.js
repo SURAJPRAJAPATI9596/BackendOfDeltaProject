@@ -117,19 +117,24 @@ app.delete("/api/listings/:id", (req, res) => {
 
 app.post("/api/listings/:id/reviews", async (req, res) => {
   const newReview = new review(req.body);
-  const reviewedListing = await Listing.findOne({ _id: req.params });
+  const { id } = req.params;
+  const reviewedListing = await Listing.findById(id);
   console.log(reviewedListing);
-  newReview
-    .save()
-    .then((result) => {
-      console.log(result);
+  await newReview.save();
+  await reviewedListing.reviews.push(newReview);
+  await reviewedListing.save();
+});
+app.get("/api/listings/:id/reviews", async (req, res) => {
+  const { id } = req.params;
+  Listing.findById(id)
+    .populate("reviews")
+    .then((data) => {
+      res.json(data.reviews);
     })
-    .then((err) => {
+    .catch((err) => {
       console.log(err);
     });
-  reviewedListing.reviews.push((prev) => ({ ...prev, newReview }));
 });
-
 app.use((err, req, res, next) => {
   res.send("Something went wrong");
 });
